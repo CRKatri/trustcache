@@ -1,0 +1,49 @@
+TC(1)                       General Commands Manual                      TC(1)
+
+NAME
+     tc – Create and interact with trustcaches
+
+SYNOPSIS
+     tc append [-u uuid | 0] infile file ...
+     tc create [-u uuid] [-v version] outfile file ...
+     tc info [-c] [-h] [-e entrynum] file
+
+DESCRIPTION
+     The tc utility is used to get info about and modify Apple trustcaches.
+
+     The following commands are supported by tc:
+
+     append [-u uuid | 0] infile file ...
+             Modify the trustcache at infile to include each signed Mach-O in
+             the specified path.  uuid is used to specify a custom uuid to be
+             used.  If it is 0, the uuid will be left the same, otherwise, it
+             will be regenerated.
+
+     create [-u uuid] [-v version] outfile file ...
+             Create a trustcache at outfile.  Each Mach-O found in the
+             specified inputs will be scanned for a code signature and hashed.
+             Any malformed or unsigned Mach-O will be ignored.  Each slice of
+             a FAT binary will have its hash included.  Versions 0 and 1 are
+             supported, if not specified, 1 is assumed.  If uuid is specified,
+             that will be used instead of a randomly generated one.
+
+     info [-c] [-h] [-e entrynum] file
+             Print information about file.  The output for each hash will be
+             in the format:
+
+                   <cdhash> <flags> [<hash_type>]
+
+             If the -c is given, only the hashes will be printed.  If -h is
+             given, only the header will be printed.  If entrynum is
+             specified, only that entry will be printed.
+
+EXIT STATUS
+     The tc utility exits 0 on success, and >0 if an error occurs.
+
+SEE ALSO
+     cryptex-dump-trust-cache(1), cryptex-generate-trust-cache(1)
+
+HISTORY
+     The tc utility was written by Cameron Katri <me@cameronkatri.com>.
+
+FreeBSD 14.0-CURRENT             May 19, 2022             FreeBSD 14.0-CURRENT
