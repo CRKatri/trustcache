@@ -1,6 +1,7 @@
 #ifndef _TRUSTCACHE_H_
 #define _TRUSTCACHE_H_
 
+#include <stdbool.h>
 #include <sys/types.h>
 
 #if __APPLE__
@@ -44,8 +45,14 @@ struct trust_cache cache_from_tree(const char *path, uint32_t version);
 int tcinfo(int argc, char **argv);
 int tccreate(int argc, char **argv);
 int tcappend(int argc, char **argv);
+int tcremove(int argc, char **argv);
 
 int ent_cmp(const void * vp1, const void * vp2);
 int hash_cmp(const void * vp1, const void * vp2);
+
+void print_header(struct trust_cache cache);
+void print_hash(uint8_t cdhash[CS_CDHASH_LEN], bool newline);
+void print_entry(struct trust_cache_entry1 entry);
+void print_entries(struct trust_cache cache);
 
 #endif

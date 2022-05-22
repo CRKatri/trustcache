@@ -4,20 +4,22 @@ NAME
      tc – Create and interact with trustcaches
 
 SYNOPSIS
-     tc append [-u uuid | 0] infile file ...
+     tc append [-f flags] [-u uuid | 0] infile file ...
      tc create [-u uuid] [-v version] outfile file ...
      tc info [-c] [-h] [-e entrynum] file
+     tc remove [-k] file hash ...
 
 DESCRIPTION
      The tc utility is used to get info about and modify Apple trustcaches.
 
      The following commands are supported by tc:
 
-     append [-u uuid | 0] infile file ...
+     append [-f flags] [-u uuid | 0] infile file ...
              Modify the trustcache at infile to include each signed Mach-O in
              the specified path.  uuid is used to specify a custom uuid to be
              used.  If it is 0, the uuid will be left the same, otherwise, it
-             will be regenerated.
+             will be regenerated.  If -f is specified, any new entries with
+             have the flags specified at flags.
 
      create [-u uuid] [-v version] outfile file ...
              Create a trustcache at outfile.  Each Mach-O found in the
@@ -36,6 +38,11 @@ DESCRIPTION
              If the -c is given, only the hashes will be printed.  If -h is
              given, only the header will be printed.  If entrynum is
              specified, only that entry will be printed.
+
+     remove [-k] file hash ...
+             Remove each specified hash from file.  If -k is specified, the
+             uuid will not be regenerated.  The number of removed entries will
+             be printed.
 
 EXIT STATUS
      The tc utility exits 0 on success, and >0 if an error occurs.

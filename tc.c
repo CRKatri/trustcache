@@ -41,9 +41,10 @@ main(int argc, char **argv)
 {
 	if (argc < 2) {
 help:
-		fprintf(stderr, "Usage: tc append [-u uuid | 0] infile file ...\n"
+		fprintf(stderr, "Usage: tc append [-f flags] [-u uuid | 0] infile file ...\n"
 										"       tc create [-u uuid] [-v version] outfile file ...\n"
-										"       tc info [-c] [-h] [-e entrynum] file\n\n"
+										"       tc info [-c] [-h] [-e entrynum] file\n"
+										"       tc remove [-k] file hash ...\n\n"
 										"See tc(1) for more information\n");
 		exit(1);
 	}
@@ -56,6 +57,8 @@ help:
 		ret = tccreate(argc - 1, argv + 1);
 	else if (strcmp(argv[1], "append") == 0)
 		ret = tcappend(argc - 1, argv + 1);
+	else if (strcmp(argv[1], "remove") == 0)
+		ret = tcremove(argc - 1, argv + 1);
 	else
 		fprintf(stderr, "Unknown subcommand %s\n", argv[1]);
 

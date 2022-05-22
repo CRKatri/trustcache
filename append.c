@@ -28,6 +28,7 @@
 #include <errno.h>
 #include <getopt.h>
 #include <stdbool.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -38,14 +39,13 @@
 int
 tcappend(int argc, char **argv)
 {
-	if (argc < 3)
-		return -1;
-
 	int keepuuid = 0;
 	uuid_t uuid;
+	const char *errstr = NULL;
+	uint8_t flags = 0;
 
 	int ch;
-	while ((ch = getopt(argc, argv, "u:")) != -1) {
+	while ((ch = getopt(argc, argv, "u:f:")) != -1) {
 		switch (ch) {
 			case 'u':
 				if (strlen(optarg) == 1 && *optarg == '0') {
@@ -57,11 +57,21 @@ tcappend(int argc, char **argv)
 						keepuuid = 2;
 				}
 				break;
+			case 'f':
+				flags = strtonum(optarg, 0, UINT8_MAX, &errstr);
+				if (errstr != NULL) {
+					fprintf(stderr, "flag number is %s: %s\n", errstr, optarg);
+					exit(1);
+				}
+				break;
 		}
 	}
 
 	argc -= optind;
 	argv += optind;
+
+	if (argc < 2)
+		return -1;
 
 	FILE *f = NULL;
 	struct trust_cache cache = opentrustcache(argv[0]);
@@ -76,16 +86,16 @@ tcappend(int argc, char **argv)
 			if ((cache.hashes = realloc(cache.hashes, sizeof(trust_cache_hash0) *
 							(cache.num_entries + append.num_entries))) == NULL)
 				exit(1);
-			for (int j = 0; j < append.num_entries; j++) {
+			for (uint32_t j = 0; j < append.num_entries; j++) {
 				memcpy(cache.hashes[cache.num_entries + j], append.hashes[j], CS_CDHASH_LEN);
 			}
 		} else if (append.version == 1) {
 			if ((cache.entries = realloc(cache.entries, sizeof(struct trust_cache_entry1) *
 							(cache.num_entries + append.num_entries))) == NULL)
 				exit(1);
-			for (int j = 0; j < append.num_entries; j++) {
+			for (uint32_t j = 0; j < append.num_entries; j++) {
 				cache.entries[cache.num_entries + j].hash_type = append.entries[j].hash_type;
-				cache.entries[cache.num_entries + j].flags = append.entries[j].flags;
+				cache.entries[cache.num_entries + j].flags = flags != 0 ? flags : append.entries[j].flags;
 				memcpy(cache.entries[cache.num_entries + j].cdhash, append.entries[j].cdhash, CS_CDHASH_LEN);
 			}
 		}
@@ -120,7 +130,7 @@ tcappend(int argc, char **argv)
 	cache.version = le32toh(cache.version);
 	cache.num_entries = le32toh(cache.num_entries);
 
-	for (int i = 0; i < cache.num_entries; i++) {
+	for (uint32_t i = 0; i < cache.num_entries; i++) {
 		if (cache.version == 0)
 			fwrite(&cache.hashes[i], sizeof(trust_cache_hash0), 1, f);
 		else if (cache.version == 1)

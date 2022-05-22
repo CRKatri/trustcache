@@ -31,6 +31,7 @@
 .Sh SYNOPSIS
 .Nm
 .Cm append
+.Op Fl f Ar flags
 .Op Fl u Ar uuid | 0
 .Ar infile
 .Ar
@@ -46,6 +47,11 @@
 .Op Fl h
 .Op Fl e Ar entrynum
 .Ar file
+.Nm
+.Cm remove
+.Op Fl k
+.Ar file
+.Ar hash ...
 .Sh DESCRIPTION
 The
 .Nm
@@ -56,6 +62,7 @@ The following commands are supported by
 .Bl -tag -width create
 .It Xo
 .Cm append
+.Op Fl f Ar flags
 .Op Fl u Ar uuid | 0
 .Ar infile
 .Ar
@@ -68,6 +75,10 @@ is used to specify a custom uuid to be used.
 If it is
 .Ar 0 ,
 the uuid will be left the same, otherwise, it will be regenerated.
+If
+.Fl f
+is specified, any new entries with have the flags specified at
+.Ar flags .
 .It Xo
 .Cm create
 .Op Fl u Ar uuid
@@ -107,6 +118,18 @@ is given, only the header will be printed.
 If
 .Ar entrynum
 is specified, only that entry will be printed.
+.It Xo
+.Cm remove
+.Op Fl k
+.Ar file
+.Ar hash ...
+.Xc
+Remove each specified hash from
+.Ar file .
+If
+.Fl k
+is specified, the uuid will not be regenerated.
+The number of removed entries will be printed.
 .El
 .Sh EXIT STATUS
 .Ex -std

@@ -26,24 +26,19 @@
  */
 
 #include <getopt.h>
-#include <limits.h>
 #include <stdbool.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 
 #include "trustcache.h"
-
-void print_header(struct trust_cache cache);
-void print_hash(uint8_t cdhash[CS_CDHASH_LEN], bool newline);
-void print_entry(struct trust_cache_entry1 entry);
-void print_entries(struct trust_cache cache);
 
 int
 tcinfo(int argc, char **argv)
 {
 	struct trust_cache cache;
 	bool headeronly = false, onlyhash = false;
-	int entrynum = -1;
+	uint32_t entrynum = -1;
 	const char *errstr = NULL;
 
 	int ch;
@@ -53,7 +48,7 @@ tcinfo(int argc, char **argv)
 				headeronly = true;
 				break;
 			case 'e':
-				entrynum = strtonum(optarg, 1, INT_MAX, &errstr);
+				entrynum = strtonum(optarg, 1, UINT32_MAX, &errstr);
 				if (errstr != NULL) {
 					fprintf(stderr, "entry number is %s: %s\n", errstr, optarg);
 					exit(1);
@@ -68,9 +63,8 @@ tcinfo(int argc, char **argv)
 	argc -= optind;
 	argv += optind;
 
-	if (argc == 0) {
+	if (argc == 0)
 		return -1;
-	}
 
 	cache = opentrustcache(argv[0]);
 
@@ -78,7 +72,7 @@ tcinfo(int argc, char **argv)
 		print_header(cache);
 	if (!headeronly) {
 		if (onlyhash) {
-			for (int i = 0; i < cache.num_entries; i++) {
+			for (uint32_t i = 0; i < cache.num_entries; i++) {
 				if (cache.version == 0)
 					print_hash(cache.hashes[i], true);
 				else
@@ -120,7 +114,7 @@ print_header(struct trust_cache cache)
 void
 print_entries(struct trust_cache cache)
 {
-	for (int i = 0; i < cache.num_entries; i++) {
+	for (uint32_t i = 0; i < cache.num_entries; i++) {
 		if (cache.version == 0)
 			print_hash(cache.hashes[i], true);
 		else if (cache.version == 1)
@@ -143,8 +137,11 @@ print_entry(struct trust_cache_entry1 entry)
 		case CS_TRUST_CACHE_AMFID|CS_TRUST_CACHE_ANE:
 			printf(" CS_TRUST_CACHE_AMFID|CS_TRUST_CACHE_ANE ");
 			break;
-		default:
+		case 0:
 			printf(" [none] ");
+			break;
+		default:
+			printf(" [%i] ", entry.flags);
 			break;
 	}
 
@@ -154,7 +151,7 @@ print_entry(struct trust_cache_entry1 entry)
 void
 print_hash(uint8_t cdhash[CS_CDHASH_LEN], bool newline)
 {
-	for (int j = 0; j < CS_CDHASH_LEN; j++) {
+	for (size_t j = 0; j < CS_CDHASH_LEN; j++) {
 		printf("%02x", cdhash[j]);
 	}
 	if (newline)

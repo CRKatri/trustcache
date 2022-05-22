@@ -28,42 +28,25 @@
 #include <errno.h>
 #include <getopt.h>
 #include <stdbool.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <unistd.h>
 
 #include "trustcache.h"
 #include "uuid/uuid.h"
 
 int
-tccreate(int argc, char **argv)
+tcremove(int argc, char **argv)
 {
-	struct trust_cache cache = {
-		.version = 1,
-		.uuid = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-		.num_entries = 0,
-		.entries = NULL,
-	}, append = {};
-
-	uuid_generate(cache.uuid);
+	bool keepuuid = false;
+	int numremoved = 0;
 
 	int ch;
-	while ((ch = getopt(argc, argv, "u:v:")) != -1) {
+	while ((ch = getopt(argc, argv, "k")) != -1) {
 		switch (ch) {
-			case 'u':
-				if (uuid_parse(optarg, cache.uuid) != 0)
-					fprintf(stderr, "Failed to parse %s as a UUID\n", optarg);
-				break;
-			case 'v':
-				if (strlen(optarg) != 1 || (optarg[0] != '0' && optarg[0] != '1')) {
-					fprintf(stderr, "Unsupported trustcache version %s\n", optarg);
-					return 1;
-				}
-				if (optarg[0] == '0')
-					cache.version = 0;
-				else if (optarg[0] == '1')
-					cache.version = 1;
+			case 'k':
+				keepuuid = true;
 				break;
 		}
 	}
@@ -71,38 +54,48 @@ tccreate(int argc, char **argv)
 	argc -= optind;
 	argv += optind;
 
-	if (argc == 0)
+	if (argc < 2)
 		return -1;
 
+	FILE *f = NULL;
+	struct trust_cache cache = opentrustcache(argv[0]);
+
+	if (!keepuuid)
+		uuid_generate(cache.uuid);
+
+	uint8_t hash[CS_CDHASH_LEN] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+
 	for (int i = 1; i < argc; i++) {
-		append = cache_from_tree(argv[i], cache.version);
-		if (append.version == 0) {
-			if ((cache.hashes = realloc(cache.hashes, sizeof(trust_cache_hash0) *
-							(cache.num_entries + append.num_entries))) == NULL)
-				exit(1);
-			for (uint32_t j = 0; j < append.num_entries; j++) {
-				memcpy(cache.hashes[cache.num_entries + j], append.hashes[j], CS_CDHASH_LEN);
-			}
-		} else if (append.version == 1) {
-			if ((cache.entries = realloc(cache.entries, sizeof(struct trust_cache_entry1) *
-							(cache.num_entries + append.num_entries))) == NULL)
-				exit(1);
-			for (uint32_t j = 0; j < append.num_entries; j++) {
-				cache.entries[cache.num_entries + j].hash_type = append.entries[j].hash_type;
-				cache.entries[cache.num_entries + j].flags = append.entries[j].flags;
-				memcpy(cache.entries[cache.num_entries + j].cdhash, append.entries[j].cdhash, CS_CDHASH_LEN);
-			}
+		if (strlen(argv[i]) != 40) {
+			fprintf(stderr, "%s is not a valid CDHash\n", argv[i]);
+			exit(1);
 		}
-		free(append.hashes);
-		cache.num_entries += append.num_entries;
+		for (size_t j = 0; j < CS_CDHASH_LEN; j++)
+			sscanf(argv[i] + 2 * j, "%02hhx", &hash[j]);
+
+		uint32_t j = 0;
+		while (j < cache.num_entries) {
+			if (cache.version == 0) {
+				if (memcmp(cache.hashes[j], hash, CS_CDHASH_LEN) == 0) {
+					memmove(&cache.hashes[j], &cache.hashes[j + 1], (cache.num_entries - j - 1) * sizeof(trust_cache_hash0));
+					cache.num_entries--;
+					numremoved++;
+					continue;
+				}
+			} else if (cache.version == 1) {
+				if (memcmp(cache.entries[j].cdhash, hash, CS_CDHASH_LEN) == 0) {
+					memmove(&cache.entries[j], &cache.entries[j + 1], (cache.num_entries - j - 1) * sizeof(struct trust_cache_entry1));
+					cache.num_entries--;
+					numremoved++;
+					continue;
+				}
+			}
+			j++;
+		}
+		for (size_t j = 0; j < CS_CDHASH_LEN; j++)
+			hash[j] = 0;
 	}
 
-	if (cache.version == 1)
-		mergesort(cache.entries, cache.num_entries, sizeof(*cache.entries), ent_cmp);
-	else if (cache.version == 0)
-		mergesort(cache.hashes, cache.num_entries, sizeof(*cache.hashes), hash_cmp);
-
-	FILE *f = NULL;
 	if ((f = fopen(argv[0], "wb")) == NULL) {
 		fprintf(stderr, "%s: %s\n", argv[0], strerror(errno));
 		return 1;
@@ -115,15 +108,13 @@ tccreate(int argc, char **argv)
 	cache.num_entries = le32toh(cache.num_entries);
 
 	for (uint32_t i = 0; i < cache.num_entries; i++) {
-		if (cache.version == 1)
-			fwrite(&cache.entries[i], sizeof(struct trust_cache_entry1), 1, f);
-		else if (cache.version == 0)
+		if (cache.version == 0)
 			fwrite(&cache.hashes[i], sizeof(trust_cache_hash0), 1, f);
+		else if (cache.version == 1)
+			fwrite(&cache.entries[i], sizeof(struct trust_cache_entry1), 1, f);
 	}
 
-	fclose(f);
-
-	free(cache.entries);
+	printf("Removed %i %s\n", numremoved, numremoved == 1 ? "entry" : "entries");
 
 	return 0;
 }
