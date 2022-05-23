@@ -33,6 +33,8 @@
 
 #include "trustcache.h"
 
+#include "compat.h"
+
 int
 tcinfo(int argc, char **argv)
 {

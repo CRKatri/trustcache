@@ -36,6 +36,8 @@
 #include "trustcache.h"
 #include "uuid/uuid.h"
 
+#include "compat.h"
+
 int
 tcappend(int argc, char **argv)
 {

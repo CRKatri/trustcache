@@ -2,6 +2,7 @@ OBJS = tc.o
 OBJS += append.o create.o info.o remove.o
 OBJS += machoparse/cdhash.o cache_from_tree.o sort.o
 OBJS += uuid/gen_uuid.o uuid/pack.o uuid/unpack.o uuid/parse.o uuid/unparse.o uuid/copy.o
+OBJS += compat_strtonum.o
 
 PREFIX ?= ~/.local
 BINDIR ?= $(PREFIX)/bin
