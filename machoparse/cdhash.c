@@ -69,6 +69,7 @@
 #	define be32toh(x) OSSwapBigToHostInt32(x)
 #elif __has_include(<endian.h>)
 #	include <endian.h>
+#	define bswap32(x) __builtin_bswap32(x)
 #else
 #	include <sys/endian.h>
 #endif
@@ -374,7 +375,7 @@ compute_cdhash_macho(const struct mach_header_64 *mh, const struct mach_header *
 	return csblob_cdhash((CS_GenericBlob *)cs_data, cs_end - cs_data, cdhash);
 }
 
-bool
+static bool
 compute_cdhash(const void *file, size_t size, struct hashes *cdhash) {
 	// Try to compute the cdhash for a Mach-O file.
 	const struct mach_header_64 *mh = file;
@@ -397,7 +398,7 @@ compute_cdhash(const void *file, size_t size, struct hashes *cdhash) {
 	return false;
 }
 
-void
+static void
 compute_cdhashes(const void *file, size_t size, struct cdhashes *h) {
 	const struct fat_header *fh = NULL;
 	if (*((uint32_t*)file) == FAT_MAGIC || *((uint32_t*)file) == FAT_CIGAM)

@@ -106,9 +106,9 @@ tcappend(int argc, char **argv)
 	}
 
 	if (cache.version == 1)
-		mergesort(cache.entries, cache.num_entries, sizeof(*cache.entries), ent_cmp);
+		qsort(cache.entries, cache.num_entries, sizeof(*cache.entries), ent_cmp);
 	else if (cache.version == 0)
-		mergesort(cache.hashes, cache.num_entries, sizeof(*cache.hashes), hash_cmp);
+		qsort(cache.hashes, cache.num_entries, sizeof(*cache.hashes), hash_cmp);
 
 	switch (keepuuid) {
 		case 0:

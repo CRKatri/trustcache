@@ -25,6 +25,7 @@
  * SUCH DAMAGE.
  */
 
+#define _XOPEN_SOURCE 500
 #include <ftw.h>
 #include <stdio.h>
 #include <string.h>
@@ -34,7 +35,7 @@
 
 static struct trust_cache cache = {};
 
-int
+static int
 tccallback(const char *path, const struct stat *sb, int typeflag, struct FTW *ftw)
 {
 	if (!S_ISREG(sb->st_mode))

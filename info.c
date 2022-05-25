@@ -40,7 +40,7 @@ tcinfo(int argc, char **argv)
 {
 	struct trust_cache cache;
 	bool headeronly = false, onlyhash = false;
-	uint32_t entrynum = -1;
+	uint32_t entrynum = 0;
 	const char *errstr = NULL;
 
 	int ch;
@@ -70,7 +70,7 @@ tcinfo(int argc, char **argv)
 
 	cache = opentrustcache(argv[0]);
 
-	if (entrynum == -1 && !onlyhash)
+	if (entrynum == 0 && !onlyhash)
 		print_header(cache);
 	if (!headeronly) {
 		if (onlyhash) {
@@ -82,7 +82,7 @@ tcinfo(int argc, char **argv)
 			}
 			goto done;
 		}
-		if (entrynum != -1) {
+		if (entrynum != 0) {
 			if (entrynum > cache.num_entries) {
 				fprintf(stderr, "no entry %i\n", entrynum);
 				exit(1);

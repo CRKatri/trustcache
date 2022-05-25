@@ -1,7 +1,7 @@
 #ifndef _UUID_H_
 #define _UUID_H_
 
-#include <sys/types.h>
+#include <stdint.h>
 
 typedef unsigned char uuid_t[16];
 

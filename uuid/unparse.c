@@ -39,7 +39,7 @@
 void uuid_unparse(const uuid_t uu, char *out)
 {
 	const uint8_t *uuid_array = (const uint8_t *)uu;
-	int uuid_index;
+	unsigned int uuid_index;
 	static const char *fmt = "0123456789ABCDEF";
 	
 	for ( uuid_index = 0; uuid_index < sizeof(uuid_t); ++uuid_index ) {
