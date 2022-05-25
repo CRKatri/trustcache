@@ -26,6 +26,7 @@
  */
 
 #define _XOPEN_SOURCE 500
+#include <errno.h>
 #include <ftw.h>
 #include <stdio.h>
 #include <string.h>
@@ -77,10 +78,17 @@ cache_from_tree(const char *path, uint32_t version)
 	ret.version = version;
 
 	if (nftw(path, tccallback, 20, 0) == -1) {
+		// on macOS, nftw(3) will fail if the path is not a directory, but we don't want that
+		if (errno == ENOTDIR) {
+			struct stat sb;
+			if (stat(path, &sb) == 0 && tccallback(path, &sb, 0, NULL) == 0)
+				goto done;
+		}
 		perror("nftw");
 		return ret;
 	}
 
+done:
 	ret.num_entries = cache.num_entries;
 	ret.hashes = cache.hashes;
 	return ret;
