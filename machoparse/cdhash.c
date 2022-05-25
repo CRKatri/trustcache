@@ -105,7 +105,7 @@ macho_identify(const struct mach_header_64 *mh, const struct mach_header *mh32, 
 
 // Get the next load command in a Mach-O file.
 static const void *
-macho_next_load_command(const struct mach_header_64 *mh, const struct mach_header *mh32, size_t size, const void *lc) {
+macho_next_load_command(const struct mach_header_64 *mh, const struct mach_header *mh32, const void *lc) {
 	const struct load_command *next = lc;
 
 	if (next == NULL) {
@@ -130,11 +130,10 @@ macho_next_load_command(const struct mach_header_64 *mh, const struct mach_heade
 
 // Find the next load command in a Mach-O file matching the given type.
 static const void *
-macho_find_load_command(const struct mach_header_64 *mh, const struct mach_header *mh32, size_t size,
-		uint32_t command, const void *lc) {
+macho_find_load_command(const struct mach_header_64 *mh, const struct mach_header *mh32, uint32_t command, const void *lc) {
 	const struct load_command *loadcmd = lc;
 	for (;;) {
-		loadcmd = macho_next_load_command(mh, mh32, size, loadcmd);
+		loadcmd = macho_next_load_command(mh, mh32, loadcmd);
 		if (loadcmd == NULL || swap(mh, mh32, loadcmd->cmd) == command) {
 			return loadcmd;
 		}
@@ -221,7 +220,7 @@ cdhash_sha384(CS_CodeDirectory *cd, size_t length, void *cdhash) {
 
 // Compute the cdhash from a CS_CodeDirectory.
 static bool
-cs_codedirectory_cdhash(CS_CodeDirectory *cd, size_t size, struct hashes *cdhash) {
+cs_codedirectory_cdhash(CS_CodeDirectory *cd, struct hashes *cdhash) {
 	size_t length = be32toh(cd->length);
 	switch (cd->hashType) {
 		case CS_HASHTYPE_SHA1:
@@ -270,7 +269,6 @@ cs_superblob_cdhash(CS_SuperBlob *sb, size_t size, void *cdhash) {
 	// Iterate through each index searching for the best code directory.
 	CS_CodeDirectory *best_cd = NULL;
 	unsigned best_cd_rank = 0;
-	size_t best_cd_size = 0;
 	uint32_t count = be32toh(sb->count);
 	for (size_t i = 0; i < count; i++) {
 		CS_BlobIndex *index = &sb->index[i];
@@ -295,7 +293,6 @@ cs_superblob_cdhash(CS_SuperBlob *sb, size_t size, void *cdhash) {
 			if (cd_rank > best_cd_rank) {
 				best_cd = cd;
 				best_cd_rank = cd_rank;
-				best_cd_size = cd_size;
 			}
 		}
 	}
@@ -305,7 +302,7 @@ cs_superblob_cdhash(CS_SuperBlob *sb, size_t size, void *cdhash) {
 		return false;
 	}
 	// Hash the code directory.
-	return cs_codedirectory_cdhash(best_cd, best_cd_size, cdhash);
+	return cs_codedirectory_cdhash(best_cd, cdhash);
 }
 
 // Compute the cdhash from a csblob.
@@ -338,7 +335,7 @@ csblob_cdhash(CS_GenericBlob *blob, size_t size, void *cdhash) {
 			if (!ok) {
 				return false;
 			}
-			return cs_codedirectory_cdhash((CS_CodeDirectory *)blob, length, cdhash);
+			return cs_codedirectory_cdhash((CS_CodeDirectory *)blob, cdhash);
 	}
 	ERROR("Unrecognized CSBlob magic 0x%08x\n", magic);
 	return false;
@@ -349,7 +346,7 @@ static bool
 compute_cdhash_macho(const struct mach_header_64 *mh, const struct mach_header *mh32, size_t size, struct hashes *cdhash) {
 	// Find the code signature command.
 	const struct linkedit_data_command *cs_cmd =
-		macho_find_load_command(mh, mh32, size, LC_CODE_SIGNATURE, NULL);
+		macho_find_load_command(mh, mh32, LC_CODE_SIGNATURE, NULL);
 	if (cs_cmd == NULL) {
 		ERROR("No code signature\n");
 		return false;

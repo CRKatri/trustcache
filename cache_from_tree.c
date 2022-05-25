@@ -36,7 +36,7 @@
 static struct trust_cache cache = {};
 
 static int
-tccallback(const char *path, const struct stat *sb, int typeflag, struct FTW *ftw)
+tccallback(const char *path, const struct stat *sb, __attribute__((unused)) int typeflag, __attribute__((unused)) struct FTW *ftw)
 {
 	if (!S_ISREG(sb->st_mode))
 		return 0;
