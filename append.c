@@ -25,6 +25,7 @@
  * SUCH DAMAGE.
  */
 
+#include <ctype.h>
 #include <errno.h>
 #include <getopt.h>
 #include <stdbool.h>
@@ -37,6 +38,14 @@
 #include "uuid/uuid.h"
 
 #include "compat.h"
+
+static bool
+ishexstring(const char *s) {
+	for (; *s != '\0'; s++)
+		if (!isxdigit(*s))
+			return false;
+	return true;
+}
 
 int
 tcappend(int argc, char **argv)
@@ -83,7 +92,20 @@ tcappend(int argc, char **argv)
 	};
 
 	for (int i = 1; i < argc; i++) {
-		append = cache_from_tree(argv[i], cache.version);
+		if (strlen(argv[i]) == 40 && ishexstring(argv[i])) {
+			append.num_entries = 1;
+			if (append.version == 0) {
+				append.hashes = calloc(1, sizeof(trust_cache_hash0));
+				for (size_t j = 0; j < CS_CDHASH_LEN; j++)
+					sscanf(argv[i] + 2 * j, "%02hhx", &append.hashes[0][j]);
+			} else {
+				append.entries = calloc(1, sizeof(struct trust_cache_entry1));
+				for (size_t j = 0; j < CS_CDHASH_LEN; j++)
+					sscanf(argv[i] + 2 * j, "%02hhx", &append.entries[0].cdhash[j]);
+			}
+		} else {
+			append = cache_from_tree(argv[i], cache.version);
+		}
 		if (append.version == 0) {
 			if ((cache.hashes = realloc(cache.hashes, sizeof(trust_cache_hash0) *
 							(cache.num_entries + append.num_entries))) == NULL)

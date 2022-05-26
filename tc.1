@@ -69,7 +69,10 @@ The following commands are supported by
 .Xc
 Modify the trustcache at
 .Ar infile
-to include each signed Mach-O in the specified path.
+to include each signed Mach-O at the specified paths.
+If
+.Ar file
+is both 40 characters and hexadecimal, that hash will be added to the cache.
 .Ar uuid
 is used to specify a custom uuid to be used.
 If it is

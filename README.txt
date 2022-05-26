@@ -15,11 +15,13 @@ DESCRIPTION
      The following commands are supported by tc:
 
      append [-f flags] [-u uuid | 0] infile file ...
-             Modify the trustcache at infile to include each signed Mach-O in
-             the specified path.  uuid is used to specify a custom uuid to be
-             used.  If it is 0, the uuid will be left the same, otherwise, it
-             will be regenerated.  If -f is specified, any new entries with
-             have the flags specified at flags.
+             Modify the trustcache at infile to include each signed Mach-O at
+             the specified paths.  If file is both 40 characters and
+             hexadecimal, that hash will be added to the cache.  uuid is used
+             to specify a custom uuid to be used.  If it is 0, the uuid will
+             be left the same, otherwise, it will be regenerated.  If -f is
+             specified, any new entries with have the flags specified at
+             flags.
 
      create [-u uuid] [-v version] outfile file ...
              Create a trustcache at outfile.  Each Mach-O found in the
