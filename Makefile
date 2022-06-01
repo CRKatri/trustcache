@@ -4,9 +4,10 @@ OBJS += machoparse/cdhash.o cache_from_tree.o sort.o
 OBJS += uuid/gen_uuid.o uuid/pack.o uuid/unpack.o uuid/parse.o uuid/unparse.o uuid/copy.o
 OBJS += compat_strtonum.o
 
-PREFIX ?= ~/.local
-BINDIR ?= $(PREFIX)/bin
-MANDIR ?= $(PREFIX)/share/man
+DESTDIR ?=
+PREFIX  ?= ~/.local
+BINDIR  ?= $(DESTDIR)$(PREFIX)/bin
+MANDIR  ?= $(DESTDIR)$(PREFIX)/share/man
 
 ifeq ($(shell uname -s),Darwin)
 	COMMONCRYPTO ?= 1
