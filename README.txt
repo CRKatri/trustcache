@@ -1,18 +1,19 @@
-TC(1)                       General Commands Manual                      TC(1)
+TRUSTCACHE(1)               General Commands Manual              TRUSTCACHE(1)
 
 NAME
-     tc – Create and interact with trustcaches
+     trustcache – Create and interact with trustcaches
 
 SYNOPSIS
-     tc append [-f flags] [-u uuid | 0] infile file ...
-     tc create [-u uuid] [-v version] outfile file ...
-     tc info [-c] [-h] [-e entrynum] file
-     tc remove [-k] file hash ...
+     trustcache append [-f flags] [-u uuid | 0] infile file ...
+     trustcache create [-u uuid] [-v version] outfile file ...
+     trustcache info [-c] [-h] [-e entrynum] file
+     trustcache remove [-k] file hash ...
 
 DESCRIPTION
-     The tc utility is used to get info about and modify Apple trustcaches.
+     The trustcache utility is used to get info about and modify Apple
+     trustcaches.
 
-     The following commands are supported by tc:
+     The following commands are supported by trustcache:
 
      append [-f flags] [-u uuid | 0] infile file ...
              Modify the trustcache at infile to include each signed Mach-O at
@@ -47,12 +48,13 @@ DESCRIPTION
              be printed.
 
 EXIT STATUS
-     The tc utility exits 0 on success, and >0 if an error occurs.
+     The trustcache utility exits 0 on success, and >0 if an error occurs.
 
 SEE ALSO
      cryptex-dump-trust-cache(1), cryptex-generate-trust-cache(1)
 
 HISTORY
-     The tc utility was written by Cameron Katri <me@cameronkatri.com>.
+     The trustcache utility was written by Cameron Katri
+     <me@cameronkatri.com>.
 
 FreeBSD 14.0-CURRENT             May 19, 2022             FreeBSD 14.0-CURRENT

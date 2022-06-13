@@ -41,11 +41,11 @@ main(int argc, char **argv)
 {
 	if (argc < 2) {
 help:
-		fprintf(stderr, "Usage: tc append [-f flags] [-u uuid | 0] infile file ...\n"
-										"       tc create [-u uuid] [-v version] outfile file ...\n"
-										"       tc info [-c] [-h] [-e entrynum] file\n"
-										"       tc remove [-k] file hash ...\n\n"
-										"See tc(1) for more information\n");
+		fprintf(stderr, "Usage: trustcache append [-f flags] [-u uuid | 0] infile file ...\n"
+										"       trustcache create [-u uuid] [-v version] outfile file ...\n"
+										"       trustcache info [-c] [-h] [-e entrynum] file\n"
+										"       trustcache remove [-k] file hash ...\n\n"
+										"See trustcache(1) for more information\n");
 		exit(1);
 	}
 	

@@ -1,5 +1,5 @@
 a.out
 *.o
 *.bin
-tc
+trustcache
 .vscode

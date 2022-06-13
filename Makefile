@@ -1,4 +1,4 @@
-OBJS = tc.o
+OBJS = trustcache.o
 OBJS += append.o create.o info.o remove.o
 OBJS += machoparse/cdhash.o cache_from_tree.o sort.o
 OBJS += uuid/gen_uuid.o uuid/pack.o uuid/unpack.o uuid/parse.o uuid/unparse.o uuid/copy.o
@@ -19,24 +19,24 @@ else
 	LIBS   += -lcrypto
 endif
 
-all: tc
+all: trustcache
 
-install: tc tc.1
+install: trustcache trustcache.1
 	install -d $(BINDIR)
-	install -m 755 tc $(BINDIR)/
+	install -m 755 trustcache $(BINDIR)/
 	install -d $(MANDIR)/man1/
-	install -m 644 tc.1 $(MANDIR)/man1/
+	install -m 644 trustcache.1 $(MANDIR)/man1/
 
 uninstall:
-	rm -i $(BINDIR)/tc $(MANDIR)/man1/tc.1
+	rm -i $(BINDIR)/trustcache $(MANDIR)/man1/trustcache.1
 
-tc: $(OBJS)
+trustcache: $(OBJS)
 	$(CC) $(CFLAGS) $(LDFLAGS) $(OBJS) -o $@ $(LIBS)
 
-README.txt: tc.1
+README.txt: trustcache.1
 	mandoc $^ | col -bx > $@
 
 clean:
-	rm -f tc $(OBJS)
+	rm -f trustcache $(OBJS)
 
 .PHONY: all clean install uninstall
