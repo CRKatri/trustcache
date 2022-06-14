@@ -96,12 +96,12 @@ jobs:
       run: |
         make -j$(nproc) \
           LDFLAGS="-static ${LDFLAGS}"
-        ${TRIPLE}-strip tc
+        ${TRIPLE}-strip trustcache
 
     - uses: actions/upload-artifact@v1
       with:
-        name: tc_linux_${{ env.ARCH }}
-        path: tc
+        name: trustcache_linux_${{ env.ARCH }}
+        path: trustcache
 
     - name: Upload Release Asset Linux
       uses: actions/upload-release-asset@v1
@@ -110,8 +110,8 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ github.event.release.upload_url }}
-        asset_path: tc
-        asset_name: tc_linux_${{ env.ARCH }}
+        asset_path: trustcache
+        asset_name: trustcache_linux_${{ env.ARCH }}
         asset_content_type: application/octet-stream
 
   build-macos:
@@ -137,12 +137,12 @@ jobs:
       run: |
         make -j$(sysctl -n hw.ncpu) \
           COMMONCRYPTO=1
-        strip tc
+        strip trustcache
 
     - uses: actions/upload-artifact@v1
       with:
-        name: tc_macos_${{ matrix.arch }}
-        path: tc
+        name: trustcache_macos_${{ matrix.arch }}
+        path: trustcache
 
     - name: Upload Release Asset Linux
       uses: actions/upload-release-asset@v1
@@ -151,6 +151,6 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ github.event.release.upload_url }}
-        asset_path: tc
-        asset_name: tc_macos_${{ matrix.arch }}
+        asset_path: trustcache
+        asset_name: trustcache_macos_${{ matrix.arch }}
         asset_content_type: application/octet-stream
