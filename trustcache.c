@@ -99,3 +99,29 @@ opentrustcache(const char *path)
 	fclose(f);
 	return cache;
 }
+
+int
+writetrustcache(struct trust_cache cache, const char *path)
+{
+	FILE *f = NULL;
+	if ((f = fopen(path, "wb")) == NULL) {
+		fprintf(stderr, "%s: %s\n", path, strerror(errno));
+		return -1;
+	}
+
+	cache.version = htole32(cache.version);
+	cache.num_entries = htole32(cache.num_entries);
+	fwrite(&cache, sizeof(struct trust_cache) - sizeof(struct trust_cache_entry1*), 1, f);
+	cache.version = le32toh(cache.version);
+	cache.num_entries = le32toh(cache.num_entries);
+
+	for (uint32_t i = 0; i < cache.num_entries; i++) {
+		if (cache.version == 0)
+			fwrite(&cache.hashes[i], sizeof(trust_cache_hash0), 1, f);
+		else if (cache.version == 1)
+			fwrite(&cache.entries[i], sizeof(struct trust_cache_entry1), 1, f);
+	}
+
+	fclose(f);
+	return 0;
+}

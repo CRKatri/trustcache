@@ -102,26 +102,8 @@ tccreate(int argc, char **argv)
 	else if (cache.version == 0)
 		qsort(cache.hashes, cache.num_entries, sizeof(*cache.hashes), hash_cmp);
 
-	FILE *f = NULL;
-	if ((f = fopen(argv[0], "wb")) == NULL) {
-		fprintf(stderr, "%s: %s\n", argv[0], strerror(errno));
+	if (writetrustcache(cache, argv[0]) == -1)
 		return 1;
-	}
-
-	cache.version = htole32(cache.version);
-	cache.num_entries = htole32(cache.num_entries);
-	fwrite(&cache, sizeof(struct trust_cache) - sizeof(struct trust_cache_entry1*), 1, f);
-	cache.version = le32toh(cache.version);
-	cache.num_entries = le32toh(cache.num_entries);
-
-	for (uint32_t i = 0; i < cache.num_entries; i++) {
-		if (cache.version == 1)
-			fwrite(&cache.entries[i], sizeof(struct trust_cache_entry1), 1, f);
-		else if (cache.version == 0)
-			fwrite(&cache.hashes[i], sizeof(trust_cache_hash0), 1, f);
-	}
-
-	fclose(f);
 
 	free(cache.entries);
 

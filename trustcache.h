@@ -40,6 +40,7 @@ struct trust_cache {
 #define CS_TRUST_CACHE_ANE   0x2
 
 struct trust_cache opentrustcache(const char *path);
+int writetrustcache(struct trust_cache cache, const char *path);
 struct trust_cache cache_from_tree(const char *path, uint32_t version);
 
 int tcinfo(int argc, char **argv);
