@@ -91,6 +91,10 @@ opentrustcache(const char *path)
 		if ((cache.entries = calloc(cache.num_entries, sizeof(struct trust_cache_entry1))) == NULL)
 			exit(EX_OSERR);
 		fread(cache.entries, sizeof(struct trust_cache_entry1), cache.num_entries, f);
+	} else if (cache.version == 2) {
+		if ((cache.entries = calloc(cache.num_entries, sizeof(struct trust_cache_entry2))) == NULL)
+			exit(EX_OSERR);
+		fread(cache.entries, sizeof(struct trust_cache_entry2), cache.num_entries, f);
 	} else {
 		fprintf(stderr, "%s: Unsupported version %i\n", path, cache.version);
 		exit(1);
@@ -120,6 +124,8 @@ writetrustcache(struct trust_cache cache, const char *path)
 			fwrite(&cache.hashes[i], sizeof(trust_cache_hash0), 1, f);
 		else if (cache.version == 1)
 			fwrite(&cache.entries[i], sizeof(struct trust_cache_entry1), 1, f);
+		else if (cache.version == 2)
+			fwrite(&cache.entries2[i], sizeof(struct trust_cache_entry2), 1, f);
 	}
 
 	fclose(f);

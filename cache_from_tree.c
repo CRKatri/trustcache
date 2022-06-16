@@ -60,6 +60,12 @@ tccallback(const char *path, const struct stat *sb, __attribute__((unused)) int 
 			cache.entries[cache.num_entries].hash_type = c.h[i].hash_type;
 			cache.entries[cache.num_entries].flags = 0;
 			memcpy(cache.entries[cache.num_entries].cdhash, c.h[i].cdhash, CS_CDHASH_LEN);
+		} else if (cache.version == 2) {
+			if ((cache.entries2 = realloc(cache.entries, sizeof(struct trust_cache_entry2) * (cache.num_entries + 1))) == NULL)
+				exit(1);
+			cache.entries2[cache.num_entries].hash_type = c.h[i].hash_type;
+			cache.entries2[cache.num_entries].category = 0;
+			memcpy(cache.entries2[cache.num_entries].cdhash, c.h[i].cdhash, CS_CDHASH_LEN);
 		}
 		cache.num_entries++;
 	}

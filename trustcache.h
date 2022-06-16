@@ -17,11 +17,18 @@
 #include "machoparse/cs_blobs.h"
 #include "uuid/uuid.h"
 
+struct trust_cache_entry2 {
+	uint8_t cdhash[CS_CDHASH_LEN];
+	uint8_t hash_type;
+	uint8_t flags;
+	uint16_t category;
+} __attribute__((__packed__));
+
 struct trust_cache_entry1 {
 	uint8_t cdhash[CS_CDHASH_LEN];
 	uint8_t hash_type;
 	uint8_t flags;
-};
+} __attribute__((__packed__));
 
 typedef uint8_t trust_cache_hash0[CS_CDHASH_LEN];
 
@@ -30,6 +37,7 @@ struct trust_cache {
 	uuid_t uuid;
 	uint32_t num_entries;
 	union {
+		struct trust_cache_entry2 *entries2;
 		struct trust_cache_entry1 *entries;
 		trust_cache_hash0 *hashes;
 	};
@@ -54,6 +62,7 @@ int hash_cmp(const void * vp1, const void * vp2);
 void print_header(struct trust_cache cache);
 void print_hash(uint8_t cdhash[CS_CDHASH_LEN], bool newline);
 void print_entry(struct trust_cache_entry1 entry);
+void print_entry2(struct trust_cache_entry2 entry);
 void print_entries(struct trust_cache cache);
 
 #endif

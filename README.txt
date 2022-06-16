@@ -28,15 +28,16 @@ DESCRIPTION
              Create a trustcache at outfile.  Each Mach-O found in the
              specified inputs will be scanned for a code signature and hashed.
              Any malformed or unsigned Mach-O will be ignored.  Each slice of
-             a FAT binary will have its hash included.  Versions 0 and 1 are
-             supported, if not specified, 1 is assumed.  If uuid is specified,
-             that will be used instead of a randomly generated one.
+             a FAT binary will have its hash included.  Versions 0, 1, and 2
+             are supported, if not specified, 1 is assumed.  If uuid is
+             specified, that will be used instead of a randomly generated one.
 
      info [-c] [-h] [-e entrynum] file
              Print information about file.  The output for each hash will be
-             in the format:
+             in one of these formats:
 
                    <cdhash> <flags> [<hash_type>]
+                   <cdhash> <flags> [<hash_type>] [<category>]
 
              If the -c is given, only the hashes will be printed.  If -h is
              given, only the header will be printed.  If entrynum is
@@ -57,4 +58,4 @@ HISTORY
      The trustcache utility was written by Cameron Katri
      <me@cameronkatri.com>.
 
-FreeBSD 14.0-CURRENT             May 19, 2022             FreeBSD 14.0-CURRENT
+FreeBSD 14.0-CURRENT             June 16, 2022            FreeBSD 14.0-CURRENT

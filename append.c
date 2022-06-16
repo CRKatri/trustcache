@@ -54,9 +54,10 @@ tcappend(int argc, char **argv)
 	uuid_t uuid;
 	const char *errstr = NULL;
 	uint8_t flags = 0;
+	uint16_t category = 0;
 
 	int ch;
-	while ((ch = getopt(argc, argv, "u:f:")) != -1) {
+	while ((ch = getopt(argc, argv, "u:f:c:")) != -1) {
 		switch (ch) {
 			case 'u':
 				if (strlen(optarg) == 1 && *optarg == '0') {
@@ -72,6 +73,13 @@ tcappend(int argc, char **argv)
 				flags = strtonum(optarg, 0, UINT8_MAX, &errstr);
 				if (errstr != NULL) {
 					fprintf(stderr, "flag number is %s: %s\n", errstr, optarg);
+					exit(1);
+				}
+				break;
+			case 'c':
+				category = strtonum(optarg, 0, UINT16_MAX, &errstr);
+				if (errstr != NULL) {
+					fprintf(stderr, "category number is %s: %s\n", errstr, optarg);
 					exit(1);
 				}
 				break;
@@ -98,10 +106,14 @@ tcappend(int argc, char **argv)
 				append.hashes = calloc(1, sizeof(trust_cache_hash0));
 				for (size_t j = 0; j < CS_CDHASH_LEN; j++)
 					sscanf(argv[i] + 2 * j, "%02hhx", &append.hashes[0][j]);
-			} else {
+			} else if (append.version == 1) {
 				append.entries = calloc(1, sizeof(struct trust_cache_entry1));
 				for (size_t j = 0; j < CS_CDHASH_LEN; j++)
 					sscanf(argv[i] + 2 * j, "%02hhx", &append.entries[0].cdhash[j]);
+			} else if (append.version == 2) {
+				append.entries2 = calloc(1, sizeof(struct trust_cache_entry2));
+				for (size_t j = 0; j < CS_CDHASH_LEN; j++)
+					sscanf(argv[i] + 2 * j, "%02hhx", &append.entries2[0].cdhash[j]);
 			}
 		} else {
 			append = cache_from_tree(argv[i], cache.version);
@@ -122,15 +134,27 @@ tcappend(int argc, char **argv)
 				cache.entries[cache.num_entries + j].flags = flags != 0 ? flags : append.entries[j].flags;
 				memcpy(cache.entries[cache.num_entries + j].cdhash, append.entries[j].cdhash, CS_CDHASH_LEN);
 			}
+		} else if (append.version == 2) {
+			if ((cache.entries2 = realloc(cache.entries, sizeof(struct trust_cache_entry2) *
+							(cache.num_entries + append.num_entries))) == NULL)
+				exit(1);
+			for (uint32_t j = 0; j < append.num_entries; j++) {
+				cache.entries2[cache.num_entries + j].hash_type = append.entries[j].hash_type;
+				cache.entries2[cache.num_entries + j].flags = flags != 0 ? flags : append.entries[j].flags;
+				cache.entries2[cache.num_entries + j].category = category != 0 ? category : append.entries2[j].category;
+				memcpy(cache.entries2[cache.num_entries + j].cdhash, append.entries2[j].cdhash, CS_CDHASH_LEN);
+			}
 		}
 		free(append.hashes);
 		cache.num_entries += append.num_entries;
 	}
 
-	if (cache.version == 1)
-		qsort(cache.entries, cache.num_entries, sizeof(*cache.entries), ent_cmp);
-	else if (cache.version == 0)
+	if (cache.version == 0)
 		qsort(cache.hashes, cache.num_entries, sizeof(*cache.hashes), hash_cmp);
+	else if (cache.version == 1)
+		qsort(cache.entries, cache.num_entries, sizeof(*cache.entries), ent_cmp);
+	else if (cache.version == 2)
+		qsort(cache.entries, cache.num_entries, sizeof(*cache.entries2), ent_cmp);
 
 	switch (keepuuid) {
 		case 0:

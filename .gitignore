@@ -3,3 +3,5 @@ a.out
 *.bin
 trustcache
 .vscode
+*.tc
+linux-sysroot

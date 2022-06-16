@@ -89,6 +89,13 @@ tcremove(int argc, char **argv)
 					numremoved++;
 					continue;
 				}
+			} else if (cache.version == 2) {
+				if (memcmp(cache.entries2[j].cdhash, hash, CS_CDHASH_LEN) == 0) {
+					memmove(&cache.entries2[j], &cache.entries2[j + 1], (cache.num_entries - j - 1) * sizeof(struct trust_cache_entry2));
+					cache.num_entries--;
+					numremoved++;
+					continue;
+				}
 			}
 			j++;
 		}

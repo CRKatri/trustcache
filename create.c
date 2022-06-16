@@ -56,7 +56,7 @@ tccreate(int argc, char **argv)
 					fprintf(stderr, "Failed to parse %s as a UUID\n", optarg);
 				break;
 			case 'v':
-				if (strlen(optarg) != 1 || (optarg[0] != '0' && optarg[0] != '1')) {
+				if (strlen(optarg) != 1 || (optarg[0] != '0' && optarg[0] != '1' && optarg[0] != '2')) {
 					fprintf(stderr, "Unsupported trustcache version %s\n", optarg);
 					return 1;
 				}
@@ -64,6 +64,8 @@ tccreate(int argc, char **argv)
 					cache.version = 0;
 				else if (optarg[0] == '1')
 					cache.version = 1;
+				else if (optarg[0] == '2')
+					cache.version = 2;
 				break;
 		}
 	}
@@ -92,15 +94,27 @@ tccreate(int argc, char **argv)
 				cache.entries[cache.num_entries + j].flags = append.entries[j].flags;
 				memcpy(cache.entries[cache.num_entries + j].cdhash, append.entries[j].cdhash, CS_CDHASH_LEN);
 			}
+		} else if (append.version == 2) {
+			if ((cache.entries2 = realloc(cache.entries2, sizeof(struct trust_cache_entry2) *
+							(cache.num_entries + append.num_entries))) == NULL)
+				exit(1);
+			for (uint32_t j = 0; j < append.num_entries; j++) {
+				cache.entries2[cache.num_entries + j].hash_type = append.entries2[j].hash_type;
+				cache.entries2[cache.num_entries + j].flags = append.entries2[j].flags;
+				cache.entries2[cache.num_entries + j].category = append.entries2[j].category;
+				memcpy(cache.entries2[cache.num_entries + j].cdhash, append.entries2[j].cdhash, CS_CDHASH_LEN);
+			}
 		}
 		free(append.hashes);
 		cache.num_entries += append.num_entries;
 	}
 
-	if (cache.version == 1)
-		qsort(cache.entries, cache.num_entries, sizeof(*cache.entries), ent_cmp);
-	else if (cache.version == 0)
+	if (cache.version == 0)
 		qsort(cache.hashes, cache.num_entries, sizeof(*cache.hashes), hash_cmp);
+	else if (cache.version == 1)
+		qsort(cache.entries, cache.num_entries, sizeof(*cache.entries), ent_cmp);
+	else if (cache.version == 2)
+		qsort(cache.entries, cache.num_entries, sizeof(*cache.entries2), ent_cmp);
 
 	if (writetrustcache(cache, argv[0]) == -1)
 		return 1;

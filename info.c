@@ -77,8 +77,10 @@ tcinfo(int argc, char **argv)
 			for (uint32_t i = 0; i < cache.num_entries; i++) {
 				if (cache.version == 0)
 					print_hash(cache.hashes[i], true);
-				else
+				else if (cache.version == 1)
 					print_hash(cache.entries[i].cdhash, true);
+				else if (cache.version == 2)
+					print_hash(cache.entries2[i].cdhash, true);
 			}
 			goto done;
 		}
@@ -87,10 +89,12 @@ tcinfo(int argc, char **argv)
 				fprintf(stderr, "no entry %i\n", entrynum);
 				exit(1);
 			}
-			if (cache.version == 1) {
-				print_entry(cache.entries[entrynum - 1]);
-			} else if (cache.version == 0) {
+			if (cache.version == 0) {
 				print_hash(cache.hashes[entrynum - 1], true);
+			} else if (cache.version == 1) {
+				print_entry(cache.entries[entrynum - 1]);
+			} else if (cache.version == 2) {
+				print_entry2(cache.entries2[entrynum - 1]);
 			}
 		} else {
 			print_entries(cache);
@@ -121,6 +125,8 @@ print_entries(struct trust_cache cache)
 			print_hash(cache.hashes[i], true);
 		else if (cache.version == 1)
 			print_entry(cache.entries[i]);
+		else if (cache.version == 2)
+			print_entry2(cache.entries2[i]);
 	}
 }
 
@@ -148,6 +154,32 @@ print_entry(struct trust_cache_entry1 entry)
 	}
 
 	printf("[%i]\n", entry.hash_type);
+}
+
+void
+print_entry2(struct trust_cache_entry2 entry)
+{
+	print_hash(entry.cdhash, false);
+
+	switch (entry.flags) {
+		case CS_TRUST_CACHE_AMFID:
+			printf(" CS_TRUST_CACHE_AMFID ");
+			break;
+		case CS_TRUST_CACHE_ANE:
+			printf(" CS_TRUST_CACHE_ANE ");
+			break;
+		case CS_TRUST_CACHE_AMFID|CS_TRUST_CACHE_ANE:
+			printf(" CS_TRUST_CACHE_AMFID|CS_TRUST_CACHE_ANE ");
+			break;
+		case 0:
+			printf(" [none] ");
+			break;
+		default:
+			printf(" [%i] ", entry.flags);
+			break;
+	}
+
+	printf("[%i] [%i]\n", entry.hash_type, entry.category);
 }
 
 void

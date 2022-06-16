@@ -22,7 +22,7 @@
 .\" OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 .\" SUCH DAMAGE.
 .\"
-.Dd May 19, 2022
+.Dd June 16, 2022
 .Dt TRUSTCACHE 1
 .Os
 .Sh NAME
@@ -95,7 +95,7 @@ Each Mach-O found in the specified inputs will be scanned for
 a code signature and hashed.
 Any malformed or unsigned Mach-O will be ignored.
 Each slice of a FAT binary will have its hash included.
-Versions 0 and 1 are supported, if not specified, 1 is assumed.
+Versions 0, 1, and 2 are supported, if not specified, 1 is assumed.
 If
 .Ar uuid
 is specified, that will be used instead of a randomly generated one.
@@ -108,9 +108,10 @@ is specified, that will be used instead of a randomly generated one.
 .Xc
 Print information about
 .Ar file .
-The output for each hash will be in the format:
+The output for each hash will be in one of these formats:
 .Pp
 .Dl <cdhash> <flags> [<hash_type>]
+.Dl <cdhash> <flags> [<hash_type>] [<category>]
 .Pp
 If the
 .Fl c
