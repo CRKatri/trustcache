@@ -141,7 +141,8 @@ tcappend(int argc, char **argv)
 			for (uint32_t j = 0; j < append.num_entries; j++) {
 				cache.entries2[cache.num_entries + j].hash_type = append.entries[j].hash_type;
 				cache.entries2[cache.num_entries + j].flags = flags != 0 ? flags : append.entries[j].flags;
-				cache.entries2[cache.num_entries + j].category = category != 0 ? category : append.entries2[j].category;
+				cache.entries2[cache.num_entries + j].constraintCategory = category != 0 ? category : append.entries2[j].constraintCategory;
+				cache.entries2[cache.num_entries + j].reserved0 = append.entries2[j].reserved0;
 				memcpy(cache.entries2[cache.num_entries + j].cdhash, append.entries2[j].cdhash, CS_CDHASH_LEN);
 			}
 		}

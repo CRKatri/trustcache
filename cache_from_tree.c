@@ -64,7 +64,8 @@ tccallback(const char *path, const struct stat *sb, __attribute__((unused)) int 
 			if ((cache.entries2 = realloc(cache.entries, sizeof(struct trust_cache_entry2) * (cache.num_entries + 1))) == NULL)
 				exit(1);
 			cache.entries2[cache.num_entries].hash_type = c.h[i].hash_type;
-			cache.entries2[cache.num_entries].category = 0;
+			cache.entries2[cache.num_entries].constraintCategory = 0;
+			cache.entries2[cache.num_entries].reserved0 = 0;
 			memcpy(cache.entries2[cache.num_entries].cdhash, c.h[i].cdhash, CS_CDHASH_LEN);
 		}
 		cache.num_entries++;

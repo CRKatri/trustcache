@@ -21,7 +21,8 @@ struct trust_cache_entry2 {
 	uint8_t cdhash[CS_CDHASH_LEN];
 	uint8_t hash_type;
 	uint8_t flags;
-	uint16_t category;
+	uint8_t constraintCategory;
+	uint8_t reserved0;
 } __attribute__((__packed__));
 
 struct trust_cache_entry1 {

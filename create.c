@@ -101,7 +101,8 @@ tccreate(int argc, char **argv)
 			for (uint32_t j = 0; j < append.num_entries; j++) {
 				cache.entries2[cache.num_entries + j].hash_type = append.entries2[j].hash_type;
 				cache.entries2[cache.num_entries + j].flags = append.entries2[j].flags;
-				cache.entries2[cache.num_entries + j].category = append.entries2[j].category;
+				cache.entries2[cache.num_entries + j].constraintCategory = append.entries2[j].constraintCategory;
+				cache.entries2[cache.num_entries + j].reserved0 = append.entries2[j].reserved0;
 				memcpy(cache.entries2[cache.num_entries + j].cdhash, append.entries2[j].cdhash, CS_CDHASH_LEN);
 			}
 		}
