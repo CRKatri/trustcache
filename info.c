@@ -179,7 +179,7 @@ print_entry2(struct trust_cache_entry2 entry)
 			break;
 	}
 
-	printf("[%i] [%i]\n", entry.hash_type, entry.category);
+	printf("[%i] [%i]\n", entry.hash_type, entry.constraintCategory);
 }
 
 void
