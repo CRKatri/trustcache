@@ -36,6 +36,9 @@
 
 #include "trustcache.h"
 
+#define STRINIZE(x) #x
+#define STRINGFY(x) STRINIZE(x)
+
 int
 main(int argc, char **argv)
 {
@@ -48,7 +51,7 @@ help:
 										"See trustcache(1) for more information\n");
 		exit(1);
 	}
-	
+
 	int ret = 1;
 
 	if (strcmp(argv[1], "info") == 0)
@@ -59,6 +62,12 @@ help:
 		ret = tcappend(argc - 1, argv + 1);
 	else if (strcmp(argv[1], "remove") == 0)
 		ret = tcremove(argc - 1, argv + 1);
+#ifdef VERSION
+    else if (strcmp(argv[1], "-v") == 0 || strcmp(argv[1], "--version") == 0)
+        fprintf(stderr, "%s, v%s\n"
+                        "See %s(1) for more information.\n",
+                        argv[0], STRINGFY(VERSION), argv[0]);
+#endif
 	else
 		fprintf(stderr, "Unknown subcommand %s\n", argv[1]);
 

@@ -9,6 +9,9 @@ PREFIX  ?= ~/.local
 BINDIR  ?= $(DESTDIR)$(PREFIX)/bin
 MANDIR  ?= $(DESTDIR)$(PREFIX)/share/man
 
+VERSION ?= 1.0
+CFLAGS  += -DVERSION=$(VERSION)
+
 ifeq ($(shell uname -s),Darwin)
 	COMMONCRYPTO ?= 1
 endif
