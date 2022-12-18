@@ -63,11 +63,11 @@ help:
 	else if (strcmp(argv[1], "remove") == 0)
 		ret = tcremove(argc - 1, argv + 1);
 #ifdef VERSION
-    else if (strcmp(argv[1], "-v") == 0 || strcmp(argv[1], "--version") == 0)
-        fprintf(stderr, " %s, v%s\n"
-                        " Supported trustcache versions: 0, 1, 2\n"
-                        " See %s(1) for more information.\n",
-                        argv[0], STRINGFY(VERSION), argv[0]);
+	else if (strcmp(argv[1], "-v") == 0 || strcmp(argv[1], "--version") == 0)
+	    fprintf(stderr, " %s, v%s\n"
+	                    " Supported trustcache versions: 0, 1, 2\n"
+	                    " See %s(1) for more information.\n",
+	                    argv[0], STRINGFY(VERSION), argv[0]);
 #endif
 	else
 		fprintf(stderr, "Unknown subcommand %s\n", argv[1]);
