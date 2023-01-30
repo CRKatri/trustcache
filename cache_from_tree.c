@@ -82,6 +82,7 @@ cache_from_tree(const char *path, uint32_t version)
 	struct trust_cache ret = {};
 	cache.version = version;
 	cache.num_entries = 0;
+	cache.entries = NULL;
 	ret.version = version;
 
 	if (nftw(path, tccallback, 20, 0) == -1) {
