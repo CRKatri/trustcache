@@ -8,7 +8,7 @@ DESTDIR ?=
 PREFIX  ?= ~/.local
 BINDIR  ?= $(DESTDIR)$(PREFIX)/bin
 MANDIR  ?= $(DESTDIR)$(PREFIX)/share/man
-VERSION ?= 1.0
+VERSION ?= 2.0
 
 CPPFLAGS += -DVERSION=$(VERSION)
 
