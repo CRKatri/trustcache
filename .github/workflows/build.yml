@@ -16,7 +16,7 @@ on:
       - created
 
 env:
-  OPENSSL_VERSION: 3.0.3
+  LIBMD_VERSION: 1.0.4
   SCCACHE_VERSION: 0.2.15
 
 jobs:
@@ -78,19 +78,17 @@ jobs:
         mv ${HOME}/sccache-v${SCCACHE_VERSION}-x86_64-unknown-linux-musl/sccache ${HOME}/${TOOLCHAIN}/bin
         chmod +x ${HOME}/${TOOLCHAIN}/bin/sccache
 
-    - name: build openssl
+    - name: build libmd
       if: steps.cache-deps.outputs.cache-hit != true
       run: |
-        export PLATFORM="linux-${ARCH}"
+        wget -q -nc -P ${DOWNLOAD_PATH} https://archive.hadrons.org/software/libmd/libmd-${LIBMD_VERSION}.tar.xz
+        tar xf ${DOWNLOAD_PATH}/libmd-${LIBMD_VERSION}.tar.xz -C ${DEP_PATH}
+        cd ${DEP_PATH}/libmd-${LIBMD_VERSION}
+        ./configure --host=${TRIPLE} --prefix=/usr --disable-shared
+        make -j$(nproc)
 
-        wget -q -nc -P ${DOWNLOAD_PATH} https://www.openssl.org/source/openssl-${OPENSSL_VERSION}.tar.gz
-        tar xf ${DOWNLOAD_PATH}/openssl-${OPENSSL_VERSION}.tar.gz -C ${DEP_PATH}
-        cd ${DEP_PATH}/openssl-${OPENSSL_VERSION}
-        ./config --prefix=/usr --static -static ${PLATFORM}
-        make -j$(nproc) build_generated libcrypto.a
-
-        echo "CPPFLAGS=${CPPFLAGS} -I${DEP_PATH}/openssl-${OPENSSL_VERSION}/include" >> $GITHUB_ENV
-        echo "LDFLAGS=${LDFLAGS} -L${DEP_PATH}/openssl-${OPENSSL_VERSION}" >> $GITHUB_ENV
+        echo "CPPFLAGS=${CPPFLAGS} -I${DEP_PATH}/libmd-${LIBMD_VERSION}/include" >> $GITHUB_ENV
+        echo "LDFLAGS=${LDFLAGS} -L${DEP_PATH}/libmd-${LIBMD_VERSION}/src/.libs" >> $GITHUB_ENV
 
     - name: build
       run: |
@@ -130,8 +128,31 @@ jobs:
 
     - name: setup environment
       run: |
+        export DOWNLOAD_PATH=${HOME}/dep_src
+        export DEP_PATH=${HOME}/build
+        mkdir -p ${DOWNLOAD_PATH} ${DEP_PATH}
+        echo "DOWNLOAD_PATH=${DOWNLOAD_PATH}" >> $GITHUB_ENV
+        echo "DEP_PATH=${DEP_PATH}" >> $GITHUB_ENV
         echo "CC=clang -arch ${ARCH} -mmacosx-version-min=10.13" >> $GITHUB_ENV
         echo "CFLAGS=-Os -flto=thin" >> $GITHUB_ENV
+        if [ "${ARCH}" = "arm64" ]; then
+          echo "TRIPLE=aarch64-apple-darwin" >> $GITHUB_ENV
+        else
+          echo "TRIPLE=${ARCH}-apple-darwin" >> $GITHUB_ENV
+        fi
+
+    - name: build libmd
+      if: steps.cache-deps.outputs.cache-hit != true
+      run: |
+        wget -q -nc -P ${DOWNLOAD_PATH} https://archive.hadrons.org/software/libmd/libmd-${LIBMD_VERSION}.tar.xz
+        tar xf ${DOWNLOAD_PATH}/libmd-${LIBMD_VERSION}.tar.xz -C ${DEP_PATH}
+        cd ${DEP_PATH}/libmd-${LIBMD_VERSION}
+        sed -i '' 's|_MSC_VER|__APPLE__|' src/local-link.h
+        ./configure --host=${TRIPLE} --prefix=/usr --disable-shared
+        make -j$(sysctl -n hw.ncpu)
+
+        echo "CPPFLAGS=${CPPFLAGS} -I${DEP_PATH}/libmd-${LIBMD_VERSION}/include" >> $GITHUB_ENV
+        echo "LDFLAGS=${LDFLAGS} -L${DEP_PATH}/libmd-${LIBMD_VERSION}/src/.libs" >> $GITHUB_ENV
 
     - name: build
       run: |

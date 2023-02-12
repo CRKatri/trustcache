@@ -57,7 +57,10 @@
 #else
 #	include <sha.h>
 #	include <sha256.h>
-#	include <sha384.h>
+#	if __has_include(<sha384.h>)
+#		include <sha384.h>
+#	endif
+#	include <sha512.h>
 #endif
 
 #if __APPLE__
@@ -197,7 +200,7 @@ cdhash_sha1(CS_CodeDirectory *cd, size_t length, void *cdhash) {
 	uint8_t digest[SHA_DIGEST_LENGTH];
 	SHA_CTX ctx;
 	SHA1_Init(&ctx);
-	SHA1_Update(&ctx, cd, length);
+	SHA1_Update(&ctx, (void *)cd, length);
 	SHA1_Final(digest, &ctx);
 	memcpy(cdhash, digest, CS_CDHASH_LEN);
 }
@@ -208,7 +211,7 @@ cdhash_sha256(CS_CodeDirectory *cd, size_t length, void *cdhash) {
 	uint8_t digest[SHA256_DIGEST_LENGTH];
 	SHA256_CTX ctx;
 	SHA256_Init(&ctx);
-	SHA256_Update(&ctx, cd, length);
+	SHA256_Update(&ctx, (void *)cd, length);
 	SHA256_Final(digest, &ctx);
 	memcpy(cdhash, digest, CS_CDHASH_LEN);
 }
@@ -219,7 +222,7 @@ cdhash_sha384(CS_CodeDirectory *cd, size_t length, void *cdhash) {
 	uint8_t digest[SHA384_DIGEST_LENGTH];
 	SHA384_CTX ctx;
 	SHA384_Init(&ctx);
-	SHA384_Update(&ctx, cd, length);
+	SHA384_Update(&ctx, (void *)cd, length);
 	SHA384_Final(digest, &ctx);
 	memcpy(cdhash, digest, CS_CDHASH_LEN);
 }
