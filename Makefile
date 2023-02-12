@@ -10,19 +10,16 @@ BINDIR  ?= $(DESTDIR)$(PREFIX)/bin
 MANDIR  ?= $(DESTDIR)$(PREFIX)/share/man
 VERSION ?= 1.0
 
-ifeq ($(shell uname -s),Darwin)
-	COMMONCRYPTO ?= 1
-endif
+CPPFLAGS += -DVERSION=$(VERSION)
 
-ifeq ($(COMMONCRYPTO),1)
-	CFLAGS += -DCOMMONCRYPTO
-else
+ifeq ($(OPENSSL),1)
+	CFLAGS += -DOPENSSL
 	LIBS   += -lcrypto
+else
+	LIBS   += -lmd
 endif
 
 all: trustcache
-
-trustcache.o: CFLAGS += -DVERSION=$(VERSION)
 
 install: trustcache trustcache.1
 	install -d $(BINDIR)

@@ -51,16 +51,13 @@
 #include <sys/types.h>
 #include <unistd.h>
 
-#if COMMONCRYPTO
-#	include <CommonCrypto/CommonCrypto.h>
-#	define SHA1 CC_SHA1
-#	define SHA_DIGEST_LENGTH CC_SHA1_DIGEST_LENGTH
-#	define SHA256 CC_SHA256
-#	define SHA256_DIGEST_LENGTH CC_SHA256_DIGEST_LENGTH
-#	define SHA384 CC_SHA384
-#	define SHA384_DIGEST_LENGTH CC_SHA384_DIGEST_LENGTH
-#else
+#if OPENSSL
 #	include <openssl/sha.h>
+#	define SHA384_CTX SHA512_CTX
+#else
+#	include <sha.h>
+#	include <sha256.h>
+#	include <sha384.h>
 #endif
 
 #if __APPLE__
@@ -198,7 +195,10 @@ cs_superblob_validate(CS_SuperBlob *sb, size_t size) {
 static void
 cdhash_sha1(CS_CodeDirectory *cd, size_t length, void *cdhash) {
 	uint8_t digest[SHA_DIGEST_LENGTH];
-	SHA1((void*)cd, length, digest);
+	SHA_CTX ctx;
+	SHA1_Init(&ctx);
+	SHA1_Update(&ctx, cd, length);
+	SHA1_Final(digest, &ctx);
 	memcpy(cdhash, digest, CS_CDHASH_LEN);
 }
 
@@ -206,7 +206,10 @@ cdhash_sha1(CS_CodeDirectory *cd, size_t length, void *cdhash) {
 static void
 cdhash_sha256(CS_CodeDirectory *cd, size_t length, void *cdhash) {
 	uint8_t digest[SHA256_DIGEST_LENGTH];
-	SHA256((void*)cd, length, digest);
+	SHA256_CTX ctx;
+	SHA256_Init(&ctx);
+	SHA256_Update(&ctx, cd, length);
+	SHA256_Final(digest, &ctx);
 	memcpy(cdhash, digest, CS_CDHASH_LEN);
 }
 
@@ -214,7 +217,10 @@ cdhash_sha256(CS_CodeDirectory *cd, size_t length, void *cdhash) {
 static void
 cdhash_sha384(CS_CodeDirectory *cd, size_t length, void *cdhash) {
 	uint8_t digest[SHA384_DIGEST_LENGTH];
-	SHA384((void*)cd, length, digest);
+	SHA384_CTX ctx;
+	SHA384_Init(&ctx);
+	SHA384_Update(&ctx, cd, length);
+	SHA384_Final(digest, &ctx);
 	memcpy(cdhash, digest, CS_CDHASH_LEN);
 }
 

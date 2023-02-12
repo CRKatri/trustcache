@@ -13,7 +13,10 @@ DESCRIPTION
      The trustcache utility is used to get info about and modify Apple
      trustcaches.
 
-     The following commands are supported by trustcache:
+     The following commands and flags are supported by trustcache:
+
+     -v, --version
+             Print the current version of trustcache.
 
      append [-f flags] [-u uuid | 0] infile file ...
              Modify the trustcache at infile to include each signed Mach-O at
